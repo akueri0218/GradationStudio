@@ -20,9 +20,13 @@ namespace GradationStudio
     /// </summary>
     public partial class MainWindow : Window
     {
+        ColorMap3D colorMap = new ColorMap3D();
+
         public MainWindow()
         {
             InitializeComponent();
         }
+
+
     }
 }
