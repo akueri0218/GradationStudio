@@ -11,6 +11,37 @@ using Microsoft.Win32;
 
 namespace GradationStudio
 {
+    class Position
+    {
+        private int x;
+        private int y;
+
+        public int X
+        {
+            get { return this.x; }
+            set { this.x = value; }
+        }
+        public int Y
+        {
+            get { return this.y; }
+            set { this.y = value; }
+        }
+
+        public Position(int x, int y)
+        {
+            this.X = x;
+            this.Y = y;
+        }
+    }
+
+    static class ColorFormat
+    {
+        public const byte GRAY = 0;
+        public const byte RGB = 1;
+        public const byte GRAY_A = 2;
+        public const byte RGBA = 3;
+    }
+
     class Color
     {
         private byte red;
@@ -39,18 +70,43 @@ namespace GradationStudio
             set { this.alpha = value; }
         }
 
-        public Color(byte r = 0, byte g = 0, byte b = 0, byte a = 255)
+        public Color(byte format, byte r = 0, byte g = 0, byte b = 0, byte a = 255)
         {
-            R = r;
-            G = g;
-            B = b;
-            A = a;
+            this.R = r;
+            this.G = g;
+            this.B = b;
+            this.A = a;
+        }
+    }
+
+    class Pixel
+    {
+        private Position pos;
+        private Color color;
+
+        public Position Pos
+        {
+            get { return this.pos; }
+            set { this.pos = value; }
+        }
+        public Color Color
+        {
+            get { return this.color; }
+            set { this.color = value; }
+        }
+
+        public Pixel(Position pos, Color color)
+        {
+            this.Pos = pos;
+            this.Color = color;
         }
     }
 
     class BMP
     {
-        private Color[] pixels;
+        private readonly string path;
+
+        private Pixel[] pixels;
 
         private int width;
         private int height;
@@ -60,7 +116,12 @@ namespace GradationStudio
 
         private int stride;
 
-        public Color[] Pixels
+        public string Path
+        {
+            get { return this.path; }
+        }
+
+        public Pixel[] Pixels
         {
             get { return this.pixels; }
             set { this.pixels = value; }
@@ -94,22 +155,27 @@ namespace GradationStudio
             set { this.stride = value; }
         }
 
-        public byte[] GetPixelAsByte()
+        public byte[] ExportPixel()
         {
-            byte[] result = new byte[Width * Height * 4];
+            byte[] result = new byte[this.Width * this.Height * 4];
+            int pos;
 
-            for(int i = 0; i < result.Length; i += 4)
+            for(int x = 0; x < this.Width; x++)
             {
-                result[i + 0] = Pixels[i / 4].B;
-                result[i + 1] = Pixels[i / 4].G;
-                result[i + 2] = Pixels[i / 4].R;
-                result[i + 3] = Pixels[i / 4].A;
+                for(int  y = 0; y < this.Height; y++)
+                {
+                    pos = x + y * this.Width * 4;
+                    result[pos + 0] = this.Pixels[pos].Color.B;
+                    result[pos + 1] = this.Pixels[pos].Color.G;
+                    result[pos + 2] = this.Pixels[pos].Color.R;
+                    result[pos + 3] = this.Pixels[pos].Color.A;
+                }
             }
 
             return result;
         }
 
-        public void LoadImage(string path)
+        public void ImportPixel(string path)
         {
             BitmapSource source = new BitmapImage(new Uri(@path, UriKind.Relative));
 
@@ -126,7 +192,7 @@ namespace GradationStudio
 
             for(int i = 0; i < pixels.Length; i += 4)
             {
-                this.Pixels[i / 4] = new Color(pixels[i + 2], pixels[i + 1], pixels[i + 0], pixels[i + 3]);
+                this.Pixels[i] = new Pixel(new Position(i % this.Width, i / this.Width), new Color(pixels[i + 2], pixels[i + 1], pixels[i + 0], pixels[i + 3]));
             }
         }
 
@@ -150,6 +216,11 @@ namespace GradationStudio
                     encoder.Save(filestream);
                 }
             }
+        }
+
+        public BMP(string path)
+        {
+            ImportPixel(path);
         }
     }
 }

@@ -6,74 +6,135 @@ using System.Threading.Tasks;
 
 namespace GradationStudio
 {
-    class ColorMap3D
+    class Palette
     {
-        private Color[] colors = { };
-        private int[] counts = { };
+        private Color color;
+        private byte pos;
 
-        public Color[] Colors
+        public Color Color
         {
-            get { return this.colors; }
-            private set { this.colors = value; }
+            get { return this.color; }
+            set { this.color = value; }
         }
-        public int[] Counts
+        public byte Pos
         {
-            get { return this.counts; }
-            set { this.counts = value; }
-        }
-
-        public ColorMap3D()
-        {
-
+            get { return this.pos; }
+            private set { this.pos = value; }
         }
 
-        public void AddColor(Color color)
+        public Palette(Color color, byte pos)
         {
-            if (Colors.Contains(color))
+            this.Color = color;
+            this.Pos = pos;
+        }
+    }
+
+    class ColorChunk
+    {
+        public static readonly byte SIZE = 8;
+
+        private readonly Color start;
+        private readonly Color end;
+
+        private Pixel[] pixels;
+
+        public Color Start
+        {
+            get { return this.start; }
+        }
+        public Color End
+        {
+            get { return this.end; }
+        }
+
+        public Pixel[] Pixels
+        {
+            get { return this.pixels; }
+            set { this.pixels = value; }
+        }
+
+        private bool Between(byte num, byte max, byte min)
+        {
+            return max >= num && num >= min;
+        }
+
+        private bool IsContain(Pixel pixel)
+        {
+            Color color = pixel.Color;
+            return Between(color.R, this.Start.R, this.End.R) && Between(color.G, this.Start.G, this.End.G) && Between(color.B, this.Start.B, this.End.B);
+        }
+
+        public Pixel[] Contain(Pixel[] pixels)
+        {
+            return Array.FindAll(pixels, IsContain);
+        }
+
+        private void AddPixel(Pixel pixel)
+        {
+            Pixel[] temp = this.Pixels;
+            int length = this.Pixels.Length;
+
+            this.Pixels = new Pixel[length + 1];
+            Array.Copy(temp, this.Pixels, length);
+
+            this.Pixels[length] = pixel;
+        }
+        public void AddPixels(Pixel[] pixels)
+        {
+            foreach(Pixel pixel in Contain(this.Pixels))
             {
-                int index = Array.IndexOf(Colors, color);
-                Counts[index]++;
-
-                return;
+                AddPixel(pixel);
             }
-
-            Color[] result = { };
-
-            Array.Copy(Colors, result, Colors.Length);
-            result[Colors.Length] = color;
-
-            Array.Copy(Counts, Counts, Colors.Length);
-            Counts[Colors.Length] = 0;
-
-            Colors = result;
         }
 
-        public void AddColorFromImage(BMP image)
+        public ColorChunk(Color start, Color end, Pixel[] pixels)
         {
-            int pos;
+            this.start = start;
+            this.end = end;
 
-            for(int x = 0; x < image.Height; x++)
+            this.Pixels = new Pixel[0];
+            AddPixels(pixels);
+        }
+    }
+
+    class ColorMap3D : BMP
+    {
+        private ColorChunk[,,] chunks;
+        private Palette[] palettes;
+        private BMP gray;
+
+        public ColorChunk[,,] Chunks
+        {
+            get { return this.chunks; }
+            private set { this.chunks = value; }
+        }
+        public Palette[] Palettes
+        {
+            get { return this.palettes; }
+            set { this.palettes = value; }
+        }
+        public BMP Gray
+        {
+            get { return this.gray; }
+            set { this.gray = value; }
+        }
+
+        public ColorMap3D(BMP image) : base(image.Path)
+        {
+            for(byte r = 0; r < 256 / ColorChunk.SIZE; r++)
             {
-                for(int y = 0; y < image.Width; y++)
+                for (byte g = 0; g < 256 / ColorChunk.SIZE; g++)
                 {
-                    pos = x + y * image.Width;
-
-                    AddColor(image.Pixels[pos]);
+                    for (byte b = 0; b < 256 / ColorChunk.SIZE; b++)
+                    {
+                        Color start = new Color((byte)(r * ColorChunk.SIZE), (byte)(g * ColorChunk.SIZE), (byte)(b * ColorChunk.SIZE));
+                        Color end = new Color((byte)((r + 1) * ColorChunk.SIZE - 1), (byte)((g + 1) * ColorChunk.SIZE - 1), (byte)((b + 1) * ColorChunk.SIZE - 1));
+                        Chunks[r, g, b] = new ColorChunk(start, end);
+                    }
                 }
             }
-        }
 
-        public string[,] getColorList()
-        {
-            string[,] result = new string[Colors.Length, 2];
 
-            for (int i = 0; i < Colors.Length; i++)
-            {
-                result[i, 0] = Colors[i].A.ToString("X2") + Colors[i].R.ToString("X2") + Colors[i].G.ToString("X2") + Colors[i].B.ToString("X2");
-                result[i, 1] = Counts[i].ToString();
-            }
-
-            return result;
         }
     }
 
