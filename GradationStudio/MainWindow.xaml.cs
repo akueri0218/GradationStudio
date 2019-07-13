@@ -20,13 +20,20 @@ namespace GradationStudio
     /// </summary>
     public partial class MainWindow : Window
     {
-        ColorMap3D colorMap = new ColorMap3D();
+        private ColorMap3D colorMap = new ColorMap3D(new BMP("../../lena.png"));
 
         public MainWindow()
         {
             InitializeComponent();
+
+            foreach(GSColor color in colorMap.Chunks.AverageColors())
+            {
+                Console.WriteLine(color.ToString());
+
+                Rectangle rectangle = new Rectangle();
+                rectangle.Fill = new SolidColorBrush(Color.FromArgb(255, color.B, color.G, color.R));
+                PaletteGrid.Children.Add(rectangle);
+            }
         }
-
-
     }
 }

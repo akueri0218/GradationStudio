@@ -15,6 +15,7 @@ namespace GradationStudio
     {
         private int x;
         private int y;
+        private int z;
 
         public int X
         {
@@ -26,23 +27,21 @@ namespace GradationStudio
             get { return this.y; }
             set { this.y = value; }
         }
+        public int Z
+        {
+            get { return this.z; }
+            set { this.z = value; }
+        }
 
-        public Position(int x, int y)
+        public Position(int x, int y, int z = 0)
         {
             this.X = x;
             this.Y = y;
+            this.Z = z;
         }
     }
 
-    static class ColorFormat
-    {
-        public const byte GRAY = 0;
-        public const byte RGB = 1;
-        public const byte GRAY_A = 2;
-        public const byte RGBA = 3;
-    }
-
-    class Color
+    class GSColor
     {
         private byte red;
         private byte green;
@@ -70,7 +69,12 @@ namespace GradationStudio
             set { this.alpha = value; }
         }
 
-        public Color(byte format, byte r = 0, byte g = 0, byte b = 0, byte a = 255)
+        public override string ToString()
+        {
+            return this.R.ToString("X2") + this.G.ToString("X2") + this.B.ToString("X2");
+        }
+
+        public GSColor(byte r = 0, byte g = 0, byte b = 0, byte a = 255)
         {
             this.R = r;
             this.G = g;
@@ -82,20 +86,20 @@ namespace GradationStudio
     class Pixel
     {
         private Position pos;
-        private Color color;
+        private GSColor color;
 
         public Position Pos
         {
             get { return this.pos; }
             set { this.pos = value; }
         }
-        public Color Color
+        public GSColor Color
         {
             get { return this.color; }
             set { this.color = value; }
         }
 
-        public Pixel(Position pos, Color color)
+        public Pixel(Position pos, GSColor color)
         {
             this.Pos = pos;
             this.Color = color;
@@ -165,19 +169,19 @@ namespace GradationStudio
                 for(int  y = 0; y < this.Height; y++)
                 {
                     pos = x + y * this.Width * 4;
-                    result[pos + 0] = this.Pixels[pos].Color.B;
-                    result[pos + 1] = this.Pixels[pos].Color.G;
-                    result[pos + 2] = this.Pixels[pos].Color.R;
-                    result[pos + 3] = this.Pixels[pos].Color.A;
+                    result[pos + 0] = this.Pixels[pos / 4].Color.B;
+                    result[pos + 1] = this.Pixels[pos / 4].Color.G;
+                    result[pos + 2] = this.Pixels[pos / 4].Color.R;
+                    result[pos + 3] = this.Pixels[pos / 4].Color.A;
                 }
             }
 
             return result;
         }
 
-        public void ImportPixel(string path)
+        public void ImportPixel()
         {
-            BitmapSource source = new BitmapImage(new Uri(@path, UriKind.Relative));
+            BitmapSource source = new BitmapImage(new Uri(@Path, UriKind.Relative));
 
             FormatConvertedBitmap fcBMP = new FormatConvertedBitmap(source, PixelFormats.Pbgra32, null, 0);
             this.Width = fcBMP.PixelWidth;
@@ -190,9 +194,11 @@ namespace GradationStudio
             this.Stride = (Width * fcBMP.Format.BitsPerPixel + 7) / 8;
             fcBMP.CopyPixels(pixels, stride, 0);
 
+            this.Pixels = new Pixel[pixels.Length / 4];
+
             for(int i = 0; i < pixels.Length; i += 4)
             {
-                this.Pixels[i] = new Pixel(new Position(i % this.Width, i / this.Width), new Color(pixels[i + 2], pixels[i + 1], pixels[i + 0], pixels[i + 3]));
+                this.Pixels[i / 4] = new Pixel(new Position(i % this.Width, i / this.Width), new GSColor(pixels[i + 2], pixels[i + 1], pixels[i + 0], pixels[i + 3]));
             }
         }
 
@@ -212,7 +218,7 @@ namespace GradationStudio
 
                     encoder.Interlace = PngInterlaceOption.On;
 
-                    encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(this.Width, this.Height, this.DpiX, this.DpiY, PixelFormats.Pbgra32, null, GetPixelAsByte(), this.Stride)));
+                    encoder.Frames.Add(BitmapFrame.Create(BitmapSource.Create(this.Width, this.Height, this.DpiX, this.DpiY, PixelFormats.Pbgra32, null, ExportPixel(), this.Stride)));
                     encoder.Save(filestream);
                 }
             }
@@ -220,7 +226,9 @@ namespace GradationStudio
 
         public BMP(string path)
         {
-            ImportPixel(path);
+            this.path = path;
+
+            ImportPixel();
         }
     }
 }

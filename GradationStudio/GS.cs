@@ -8,10 +8,10 @@ namespace GradationStudio
 {
     class Palette
     {
-        private Color color;
-        private byte pos;
+        private GSColor color;
+        private byte pos = 0;
 
-        public Color Color
+        public GSColor Color
         {
             get { return this.color; }
             set { this.color = value; }
@@ -19,13 +19,12 @@ namespace GradationStudio
         public byte Pos
         {
             get { return this.pos; }
-            private set { this.pos = value; }
+            set { this.pos = value; }
         }
 
-        public Palette(Color color, byte pos)
+        public Palette(GSColor color)
         {
             this.Color = color;
-            this.Pos = pos;
         }
     }
 
@@ -33,77 +32,166 @@ namespace GradationStudio
     {
         public static readonly byte SIZE = 8;
 
-        private readonly Color start;
-        private readonly Color end;
-
+        private Position pos;
         private Pixel[] pixels;
 
-        public Color Start
+        public Position Pos
         {
-            get { return this.start; }
+            get { return this.pos; }
+            set { this.pos = value; }
         }
-        public Color End
-        {
-            get { return this.end; }
-        }
-
         public Pixel[] Pixels
         {
             get { return this.pixels; }
             set { this.pixels = value; }
         }
 
-        private bool Between(byte num, byte max, byte min)
+        public void AddPixel(Pixel pixel)
         {
-            return max >= num && num >= min;
-        }
+            if(this.Pixels == null)
+            {
+                this.Pixels = new Pixel[1] { pixel };
+                return;
+            }
 
-        private bool IsContain(Pixel pixel)
-        {
-            Color color = pixel.Color;
-            return Between(color.R, this.Start.R, this.End.R) && Between(color.G, this.Start.G, this.End.G) && Between(color.B, this.Start.B, this.End.B);
-        }
-
-        public Pixel[] Contain(Pixel[] pixels)
-        {
-            return Array.FindAll(pixels, IsContain);
-        }
-
-        private void AddPixel(Pixel pixel)
-        {
             Pixel[] temp = this.Pixels;
-            int length = this.Pixels.Length;
 
-            this.Pixels = new Pixel[length + 1];
-            Array.Copy(temp, this.Pixels, length);
+            this.Pixels = new Pixel[temp.Length + 1];
+            Array.Copy(temp, this.Pixels, temp.Length);
 
-            this.Pixels[length] = pixel;
+            this.Pixels[temp.Length] = pixel;
         }
         public void AddPixels(Pixel[] pixels)
         {
-            foreach(Pixel pixel in Contain(this.Pixels))
+            if (pixels == null) return;
+
+            foreach (Pixel pixel in this.Pixels)
             {
                 AddPixel(pixel);
             }
         }
 
-        public ColorChunk(Color start, Color end, Pixel[] pixels)
+        public GSColor AverageColor()
         {
-            this.start = start;
-            this.end = end;
+            if (this.Pixels == null) return null;
+            if (this.Pixels.Length < ColorChunk.SIZE * ColorChunk.SIZE * ColorChunk.SIZE * 0.5) return null;
 
-            this.Pixels = new Pixel[0];
-            AddPixels(pixels);
+            int avgR = 0;
+            int avgG = 0;
+            int avgB = 0;
+
+            foreach (Pixel pixel in this.Pixels)
+            {
+                avgR += pixel.Color.R;
+                avgG += pixel.Color.G; 
+                avgB += pixel.Color.B;
+            }
+
+            avgR /= this.Pixels.Length;
+            avgR /= this.Pixels.Length;
+            avgR /= this.Pixels.Length;
+
+            return new GSColor((byte)avgR, (byte)avgG, (byte)avgB);
+        }
+
+        public static ColorChunk[] Push(ColorChunk[] chunks, ColorChunk chunk)
+        {
+            if(chunks == null)
+                return new ColorChunk[1] { chunk };
+
+            ColorChunk[] temp = chunks;
+            chunks = new ColorChunk[chunks.Length + 1];
+
+            Array.Copy(temp, chunks, temp.Length);
+            chunks[chunks.Length - 1] = chunk;
+
+            return chunks;
+        }
+
+        public ColorChunk(Position pos)
+        {
+            this.Pos = pos;
         }
     }
 
-    class ColorMap3D : BMP
+    class ColorChunks
     {
-        private ColorChunk[,,] chunks;
+        private ColorChunk[] chunks;
+
+        public ColorChunk[] Chunks
+        {
+            get { return this.chunks; }
+            set { this.chunks = value; }
+        }
+
+        private bool DistributeColor(ColorChunk chunk, GSColor color)
+        {
+            if (chunk == null)
+                return false;
+            bool R = chunk.Pos.X == color.R / ColorChunk.SIZE;
+            bool G = chunk.Pos.Y == color.G / ColorChunk.SIZE;
+            bool B = chunk.Pos.Z == color.B / ColorChunk.SIZE;
+
+            return R && G && B ? true : false;
+
+        }
+        public void AddPixels(Pixel[] pixels)
+        {
+            foreach(Pixel pixel in pixels)
+            {
+                if (this.Chunks == null)
+                    this.Chunks = ColorChunk.Push(this.Chunks ,new ColorChunk(new Position(pixel.Color.R / ColorChunk.SIZE, pixel.Color.G / ColorChunk.SIZE, pixel.Color.B / ColorChunk.SIZE)));
+                else if (Array.Find(this.Chunks, chunk => DistributeColor(chunk, pixel.Color)) == null)
+                    this.Chunks = ColorChunk.Push(this.Chunks ,new ColorChunk(new Position(pixel.Color.R / ColorChunk.SIZE, pixel.Color.G / ColorChunk.SIZE, pixel.Color.B / ColorChunk.SIZE)));
+
+                Array.Find(this.Chunks, chunk => DistributeColor(chunk, pixel.Color)).AddPixel(pixel);
+            }
+        }
+
+        public GSColor[] AverageColors()
+        {
+            GSColor[] result = null;
+            GSColor[] temp;
+
+            foreach (ColorChunk chunk in this.Chunks)
+            {
+                if (chunk.AverageColor() != null)
+                {
+                    if (result == null)
+                        result = new GSColor[1] { chunk.AverageColor() };
+                    else
+                    {
+                        temp = result;
+                        result = new GSColor[temp.Length + 1];
+                        Array.Copy(temp, result, temp.Length);
+
+                        result[temp.Length] = chunk.AverageColor();
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public ColorChunks()
+        {
+
+        }
+    }
+
+    class ColorMap3D
+    {
+        private BMP image;
+        private ColorChunks chunks;
         private Palette[] palettes;
         private BMP gray;
 
-        public ColorChunk[,,] Chunks
+        public BMP Image
+        {
+            get { return this.image; }
+            set { this.image = value; }
+        }
+        public ColorChunks Chunks
         {
             get { return this.chunks; }
             private set { this.chunks = value; }
@@ -119,22 +207,12 @@ namespace GradationStudio
             set { this.gray = value; }
         }
 
-        public ColorMap3D(BMP image) : base(image.Path)
+        public ColorMap3D(BMP image)
         {
-            for(byte r = 0; r < 256 / ColorChunk.SIZE; r++)
-            {
-                for (byte g = 0; g < 256 / ColorChunk.SIZE; g++)
-                {
-                    for (byte b = 0; b < 256 / ColorChunk.SIZE; b++)
-                    {
-                        Color start = new Color((byte)(r * ColorChunk.SIZE), (byte)(g * ColorChunk.SIZE), (byte)(b * ColorChunk.SIZE));
-                        Color end = new Color((byte)((r + 1) * ColorChunk.SIZE - 1), (byte)((g + 1) * ColorChunk.SIZE - 1), (byte)((b + 1) * ColorChunk.SIZE - 1));
-                        Chunks[r, g, b] = new ColorChunk(start, end);
-                    }
-                }
-            }
+            this.Image = image;
+            this.Chunks = new ColorChunks();
 
-
+            this.Chunks.AddPixels(this.Image.Pixels);
         }
     }
 

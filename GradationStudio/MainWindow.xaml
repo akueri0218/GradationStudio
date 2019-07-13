@@ -6,7 +6,5 @@
         xmlns:local="clr-namespace:GradationStudio"
         mc:Ignorable="d"
         Title="GradationStudio" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+    <UniformGrid x:Name="PaletteGrid" Rows="1"/>
 </Window>
