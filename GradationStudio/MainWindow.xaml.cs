@@ -13,6 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using GS_BMP;
+using GS;
+
 namespace GradationStudio
 {
     /// <summary>
@@ -20,20 +23,47 @@ namespace GradationStudio
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ColorMap3D colorMap = new ColorMap3D(new BMP("../../lena.png"));
+        private BMP bmp = new BMP("../../img/lena.png");
+        //private BMP source_bmp = new BMP("../../img/lena.png");
+        private ColorMap map;
+        //private ColorMap source_map;
+
+        private Gradation gradation;
+        //private Gradation source_gradation;
 
         public MainWindow()
         {
             InitializeComponent();
+        }
 
-            foreach(GSColor color in colorMap.Chunks.AverageColors())
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            map = new ColorMap(bmp.Pixels);
+            //source_map = new ColorMap(source_bmp.Pixels);
+
+            gradation = new Gradation(map.ColorList);
+            //source_gradation = new Gradation(source_map.ChunkColorList);
+
+            foreach (GSColor color in gradation.ColorList)
             {
-                Console.WriteLine(color.ToString());
-
-                Rectangle rectangle = new Rectangle();
-                rectangle.Fill = new SolidColorBrush(Color.FromArgb(255, color.B, color.G, color.R));
-                PaletteGrid.Children.Add(rectangle);
+                Label label = new Label();
+                //label.Content = ((double)map.ChunkList[map.ChunkColorList.IndexOf(color)].PixelList.Count / (bmp.Width * bmp.Height) * 100).ToString("F5") + "%";
+                label.Background = color.AsSolidColor();
+                //if ((color.R + color.G + color.B) / 3 < 64) label.Foreground = Brushes.White;
+                label.HorizontalContentAlignment = HorizontalAlignment.Right;
+                label.Padding = new Thickness(0, 20, 10, 0);
+                label.Margin = new Thickness(0, 0, 0, 0);
+                label.Height = 3;
+                PaletteGrid.Children.Add(label);
             }
+
+            Pixel[] result = bmp.Pixels;
+            foreach(Pixel pixel in result)
+            {
+                pixel.Color = gradation.ColorList[gradation.ColorIndex(pixel.Color)];
+            }
+
+            BMP.ExportImage(result, bmp.Width, bmp.Height, bmp.DpiX, bmp.DpiY, bmp.Stride);
         }
     }
 }

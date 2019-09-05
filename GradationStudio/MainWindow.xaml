@@ -5,6 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GradationStudio"
         mc:Ignorable="d"
-        Title="GradationStudio" Height="450" Width="800">
-    <UniformGrid x:Name="PaletteGrid" Rows="1"/>
+        Title="GradationStudio" FontSize="16"
+        Loaded="Window_Loaded" SizeToContent="WidthAndHeight" MinHeight="0" MinWidth="240" MaxWidth="240" ResizeMode="CanResize">
+    <ScrollViewer>
+        <StackPanel x:Name="PaletteGrid"></StackPanel>
+    </ScrollViewer>
 </Window>
