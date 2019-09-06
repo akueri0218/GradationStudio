@@ -6,8 +6,10 @@
         xmlns:local="clr-namespace:GradationStudio"
         mc:Ignorable="d"
         Title="GradationStudio" FontSize="16"
-        Loaded="Window_Loaded" SizeToContent="WidthAndHeight" MinHeight="0" MinWidth="240" MaxWidth="240" ResizeMode="CanResize">
+        SizeToContent="WidthAndHeight" MinHeight="0" MinWidth="240" MaxWidth="240" ResizeMode="CanResize">
     <ScrollViewer>
-        <StackPanel x:Name="PaletteGrid"></StackPanel>
+        <StackPanel x:Name="PaletteGrid">
+            <Button x:Name="InitButton" Click="InitButton_Click"/>
+        </StackPanel>
     </ScrollViewer>
 </Window>

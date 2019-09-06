@@ -36,15 +36,19 @@ namespace GradationStudio
             InitializeComponent();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void GSInit()
         {
             map = new ColorMap(bmp.Pixels);
             //source_map = new ColorMap(source_bmp.Pixels);
 
-            gradation = new Gradation(map.ColorList);
+            await Task.Run(() => { gradation = new Gradation(map.ColorList); });
             //source_gradation = new Gradation(source_map.ChunkColorList);
 
-            foreach (GSColor color in gradation.ColorList)
+            List<GSColor> colorList = new List<GSColor>();
+            foreach (Pallet pallet in gradation.KeyColorPallet)
+                colorList.Add(pallet.Color);
+
+            foreach (GSColor color in colorList)
             {
                 Label label = new Label();
                 //label.Content = ((double)map.ChunkList[map.ChunkColorList.IndexOf(color)].PixelList.Count / (bmp.Width * bmp.Height) * 100).ToString("F5") + "%";
@@ -56,14 +60,11 @@ namespace GradationStudio
                 label.Height = 3;
                 PaletteGrid.Children.Add(label);
             }
+        }
 
-            Pixel[] result = bmp.Pixels;
-            foreach(Pixel pixel in result)
-            {
-                pixel.Color = gradation.ColorList[gradation.ColorIndex(pixel.Color)];
-            }
-
-            BMP.ExportImage(result, bmp.Width, bmp.Height, bmp.DpiX, bmp.DpiY, bmp.Stride);
+        private void InitButton_Click(object sender, RoutedEventArgs e)
+        {
+            GSInit();
         }
     }
 }

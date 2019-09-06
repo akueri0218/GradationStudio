@@ -43,6 +43,7 @@ namespace GS_BMP
         {
             return Math.Sqrt(Math.Pow(R - color.R, 2) + Math.Pow(G - color.G, 2) + Math.Pow(B - color.B, 2));
         }
+        //内積
         public int InnerProduct(GSColor color1, GSColor color2)
         {
             int R1 = color1.R - R;
@@ -55,6 +56,7 @@ namespace GS_BMP
 
             return R1 * R2 + G1 * G2 + B1 * B2; 
         }
+        //影
         public double Projection(GSColor end, GSColor color)
         {
             return InnerProduct(end, color) / Distance(end);
