@@ -44,9 +44,7 @@ namespace GradationStudio
             await Task.Run(() => { gradation = new Gradation(map.ColorList); });
             //source_gradation = new Gradation(source_map.ChunkColorList);
 
-            List<GSColor> colorList = new List<GSColor>();
-            foreach (Pallet pallet in gradation.KeyColorPallet)
-                colorList.Add(pallet.Color);
+            List<GSColor> colorList = Gradation.MakeGradation(gradation.KeyColorPallet);
 
             foreach (GSColor color in colorList)
             {
@@ -57,13 +55,18 @@ namespace GradationStudio
                 label.HorizontalContentAlignment = HorizontalAlignment.Right;
                 label.Padding = new Thickness(0, 20, 10, 0);
                 label.Margin = new Thickness(0, 0, 0, 0);
-                label.Height = 3;
+                label.Height = 30;
                 PaletteGrid.Children.Add(label);
             }
         }
 
         private void InitButton_Click(object sender, RoutedEventArgs e)
         {
+            Button btn = (Button)sender;
+            btn.IsEnabled = false;
+
+
+
             GSInit();
         }
     }

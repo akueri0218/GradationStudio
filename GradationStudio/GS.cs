@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 using GS_BMP;
 
@@ -20,10 +21,10 @@ namespace GS
         {
             Count++;
         }
-        public ColorChunk(GSColor color)
+        public ColorChunk(GSColor color, int count = 0)
         {
             Color = color;
-            Count = 0;
+            Count = count;
         }
     }
 
@@ -52,9 +53,9 @@ namespace GS
     class Pallet
     {
         public GSColor Color { get; set; }
-        public byte Pos { get; set; }
+        public int Pos { get; set; }
 
-        public Pallet(GSColor color, byte pos = 0)
+        public Pallet(GSColor color, int pos = 0)
         {
             Color = color;
             Pos = pos;
@@ -64,10 +65,23 @@ namespace GS
     class Gradation
     {
         //近さの閾値
-        private static double CLOSENESS = 8; 
+        private static double CLOSENESS = 32; 
 
         public List<GSColor> ColorList { get; set; }
         public List<Pallet> KeyColorPallet { get; private set; }
+
+        public static List<GSColor> MakeGradation(List<Pallet> palletList)
+        {
+            List<GSColor> colorList = new List<GSColor>();
+
+            for(int i = 1; i < palletList.Count; i++)
+            {
+                colorList.AddRange(GSColor.Gradation(palletList[i - 1].Color, palletList[i].Color, palletList[i].Pos));
+            }
+            colorList.Add(palletList.Last().Color);
+
+            return colorList;
+        }
 
         public List<Pallet> GetKeyColorList()
         {
@@ -79,7 +93,11 @@ namespace GS
 
             List<ColorLine> lineList = new List<ColorLine>();
 
+            Stopwatch stopwatch = new Stopwatch();
+
             Console.WriteLine("Getting key color data...");
+
+            stopwatch.Start();
 
             //1番目に数の多い色と2番目に数の多い色を通る直線を引く
             ColorLine dummy = new ColorLine(queue[0], queue[1]);
@@ -100,8 +118,8 @@ namespace GS
 
             while (queue.Count > 0)
             {
-                //終点を始点にしてqueueの中で1番目に数の多い色を終点とする直線を引く
-                dummy = new ColorLine(end, queue[0]);
+                //終点を始点にしてqueueの中で1番に近い色を終点とする直線を引く
+                dummy = new ColorLine(end, queue.OrderBy(color => end.Distance(color)).First());
 
                 //その直線に近い点のうちlineのBeginよりEnd側をすべてwaitListに追加，queueから削除
                 lineColorList.AddRange(queue.FindAll(color => dummy.Distance(color) < CLOSENESS && dummy.Begin.Projection(dummy.End, color) >= 0));
@@ -121,13 +139,21 @@ namespace GS
             //lineListの直線の長さの合計とそれぞれの直線の長さから長さの割合を出す
             //その割合に合わせてKeyColorListに追加
 
-            Console.WriteLine("Key colors data was gotten successfully!");
+            stopwatch.Stop();
 
-            //Debug
+            Console.WriteLine("Key colors data was gotten successfully!");
+            Console.WriteLine("Elapsed: " + stopwatch.Elapsed.ToString());
+
+            double LengthSum = lineList.Sum(line => line.Length);
+
             List<Pallet> palletList = new List<Pallet>();
+
+            palletList.Add(new Pallet(lineList.First().Begin, 0));
             foreach (ColorLine line in lineList)
-                palletList.Add(new Pallet(line.Begin));
-            palletList.Add(new Pallet(lineList.Last().End));
+            {
+                Console.WriteLine((int)(line.Length / LengthSum * 255));
+                palletList.Add(new Pallet(line.End, (int)(line.Length / LengthSum * 255)));
+            }                
             return palletList;
         }
 
@@ -196,16 +222,18 @@ namespace GS
         {
             if (ChunkList == null) ChunkList = new List<ColorChunk>();
 
+            List<Pixel> pixelList = new List<Pixel>(pixels);
+
+            Stopwatch stopwatch = new Stopwatch();
+
             Console.WriteLine("Loading pixels...");
 
-            foreach (Pixel pixel in pixels)
-            {
-                if (ChunkList.Find(chunk => chunk.Color.Equals(pixel.Color)) == null)
-                {
-                    ChunkList.Add(new ColorChunk(pixel.Color));
-                }
+            stopwatch.Start();
 
-                ChunkList.Find(chunk => chunk.Color.Equals(pixel.Color)).Add();
+            while (pixelList.Count > 0)
+            {
+                ChunkList.Add(new ColorChunk(pixelList.First().Color, pixelList.FindAll(pixel => pixel.Color.Equals(pixelList.First().Color)).Count));
+                pixelList.RemoveAll(pixel => pixel.Color.Equals(pixelList.First().Color));
             }
 
             // Sort by Count
@@ -214,7 +242,10 @@ namespace GS
 
             ColorList = ChunkList.Select(chunk => chunk.Color).ToList();
 
+            stopwatch.Stop();
+
             Console.WriteLine("Pixels was loaded successfully!");
+            Console.WriteLine("Elapsed: " + stopwatch.Elapsed.ToString());
         }
 
         public List<int> getMaxIndex(List<ColorChunk> chunks)

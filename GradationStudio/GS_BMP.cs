@@ -72,6 +72,24 @@ namespace GS_BMP
             return new SolidColorBrush(Color.FromArgb(A, R, G, B));
         }
 
+        public static List<GSColor> Gradation(GSColor begin, GSColor end, int Length)
+        {
+            List<GSColor> colorList = new List<GSColor>();
+
+            if (Length == 0) Length = 1;
+
+            double scaleR = (double)(end.R - begin.R) / Length;
+            double scaleG = (double)(end.G - begin.G) / Length;
+            double scaleB = (double)(end.B - begin.B) / Length;
+
+            for(int i = 0; i < Length; i++)
+            {
+                colorList.Add(new GSColor((byte)(begin.R + scaleR * i), (byte)(begin.G + scaleG * i), (byte)(begin.B + scaleB * i)));
+            }
+
+            return colorList;
+        }
+
         public override string ToString()
         {
             return this.R.ToString("X2") + this.G.ToString("X2") + this.B.ToString("X2");
@@ -82,17 +100,15 @@ namespace GS_BMP
             return obj is GSColor color &&
                    R == color.R &&
                    G == color.G &&
-                   B == color.B &&
-                   A == color.A;
+                   B == color.B;
         }
 
         public override int GetHashCode()
         {
-            var hashCode = 1960784236;
+            var hashCode = -1520100960;
             hashCode = hashCode * -1521134295 + R.GetHashCode();
             hashCode = hashCode * -1521134295 + G.GetHashCode();
             hashCode = hashCode * -1521134295 + B.GetHashCode();
-            hashCode = hashCode * -1521134295 + A.GetHashCode();
             return hashCode;
         }
 
