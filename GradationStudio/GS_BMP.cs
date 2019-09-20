@@ -76,7 +76,7 @@ namespace GS_BMP
         {
             List<GSColor> colorList = new List<GSColor>();
 
-            if (Length == 0) Length = 1;
+            if (Length == 0) return colorList;
 
             double scaleR = (double)(end.R - begin.R) / Length;
             double scaleG = (double)(end.G - begin.G) / Length;

@@ -23,7 +23,7 @@ namespace GradationStudio
     /// </summary>
     public partial class MainWindow : Window
     {
-        private BMP bmp = new BMP("../../img/lena.png");
+        private BMP bmp = new BMP("../../img/bosco.jpg");
         //private BMP source_bmp = new BMP("../../img/lena.png");
         private ColorMap map;
         //private ColorMap source_map;
@@ -44,9 +44,11 @@ namespace GradationStudio
             await Task.Run(() => { gradation = new Gradation(map.ColorList); });
             //source_gradation = new Gradation(source_map.ChunkColorList);
 
+            Task.WaitAll();
+            
             List<GSColor> colorList = Gradation.MakeGradation(gradation.KeyColorPallet);
 
-            foreach (GSColor color in colorList)
+            colorList.ForEach(color =>
             {
                 Label label = new Label();
                 //label.Content = ((double)map.ChunkList[map.ChunkColorList.IndexOf(color)].PixelList.Count / (bmp.Width * bmp.Height) * 100).ToString("F5") + "%";
@@ -55,9 +57,9 @@ namespace GradationStudio
                 label.HorizontalContentAlignment = HorizontalAlignment.Right;
                 label.Padding = new Thickness(0, 20, 10, 0);
                 label.Margin = new Thickness(0, 0, 0, 0);
-                label.Height = 30;
+                label.Height = 3;
                 PaletteGrid.Children.Add(label);
-            }
+            });
         }
 
         private void InitButton_Click(object sender, RoutedEventArgs e)
