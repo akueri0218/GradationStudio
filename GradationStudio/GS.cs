@@ -53,9 +53,9 @@ namespace GS
     class Pallet
     {
         public GSColor Color { get; set; }
-        public int Pos { get; set; }
+        public byte Pos { get; set; }
 
-        public Pallet(GSColor color, int pos = 0)
+        public Pallet(GSColor color, byte pos = 0)
         {
             Color = color;
             Pos = pos;
@@ -65,7 +65,7 @@ namespace GS
     class Gradation
     {
         //近さの閾値
-        private static double CLOSENESS = 32; 
+        private static double CLOSENESS = 64; 
 
         public List<GSColor> ColorList { get; set; }
         public List<Pallet> KeyColorPallet { get; private set; }
@@ -86,6 +86,7 @@ namespace GS
         public List<Pallet> GetKeyColorList()
         {
             List<GSColor> queue = new List<GSColor>(ColorList);
+            List<GSColor> buffer = new List<GSColor>();
             List<GSColor> lineColorList = new List<GSColor>();
 
             GSColor begin = new GSColor();
@@ -93,22 +94,30 @@ namespace GS
 
             List<ColorLine> lineList = new List<ColorLine>();
 
+            int i;
+
             Stopwatch stopwatch = new Stopwatch();
 
             Console.WriteLine("Getting key color data...");
 
             stopwatch.Start();
 
-            //1番目に数の多い色と2番目に数の多い色を通る直線を引く
             ColorLine dummy = new ColorLine(queue[0], queue[1]);
 
-            //その直線に近い点をすべてlineColorListに追加，queueから削除
-            lineColorList.AddRange(queue.FindAll(color => dummy.Distance(color) < CLOSENESS));
+            for (i = 0; i < queue.Count && !lineColorList.Any(); i++)
+            {
+                //1番目に数の多い色と2番目に数の多い色を通る直線を引く
+                dummy = new ColorLine(queue[0], queue[i]);
+
+                //その直線に近い点をすべてlineColorListに追加，queueから削除
+                lineColorList.AddRange(queue.FindAll(color => dummy.Distance(color) < CLOSENESS));
+            } 
+
             queue.RemoveAll(color => lineColorList.Contains(color));
 
             //その直線に近い点の中で，直線の端に近い点(影が一番長い)を始点，終点にする
             //影の長さでソート 降順？
-            lineColorList.OrderBy(color => dummy.Begin.Projection(dummy.End, color));
+            lineColorList = new List<GSColor>(lineColorList.OrderBy(color => dummy.Begin.Projection(dummy.End, color)));
 
             begin = lineColorList.First();
             end = lineColorList.Last();
@@ -123,17 +132,43 @@ namespace GS
                 //終点を始点にしてqueueの中で1番に遠い色を終点とする直線を引く
                 dummy = new ColorLine(end, queue.OrderBy(color => end.Distance(color)).First());
 
-                //その直線に近い点のうちlineのBeginよりEnd側をすべてwaitListに追加，queueから削除
-                lineColorList.AddRange(queue.FindAll(color => dummy.Distance(color) < CLOSENESS && dummy.Begin.Projection(dummy.End, color) >= 0));
+                //lineのBeginよりEnd側をlineColorListに追加
+                queue.OrderBy(color => dummy.Begin.Projection(dummy.End, color));
+                for(i = 0; i < queue.Count - 1; i++)
+                {
+                    if (dummy.Begin.Projection(dummy.End, queue[i]) < 0)
+                        break;
+                }
+                lineColorList = new List<GSColor>(queue.GetRange(0, i));
+
+                Console.WriteLine("count: " + lineColorList.Count);
+
+                //lineに近い点のみwaitListに追加，queueから削除
+                lineColorList = new List<GSColor>(lineColorList.OrderBy(color => -dummy.Distance(color)));
+
+                for (i = 0; i < lineColorList.Count - 1; i++)
+                {
+                    if (dummy.Distance(lineColorList[i]) >= CLOSENESS)
+                        break;
+                }
+                lineColorList.RemoveRange(i, lineColorList.Count - i);
                 queue.RemoveAll(color => lineColorList.Contains(color));
+
+                Console.WriteLine("Count: " + lineColorList.Count);
 
                 //その直線に近い点の中で，直線の端に近い点(影が一番長い)を終点にする始点は直線の始点
                 //影の長さでソート 降順？
-                lineColorList.OrderBy(color => dummy.Begin.Projection(dummy.End, color));
+                lineColorList = new List<GSColor>(lineColorList.OrderBy(color => dummy.Begin.Projection(dummy.End, color)));
 
                 begin = dummy.Begin;
-                end = lineColorList.Last();
-
+                try
+                {
+                    end = lineColorList.Last();
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
                 //直線をlineListに追加
                 lineList.Add(new ColorLine(begin, end));
 
@@ -157,7 +192,7 @@ namespace GS
             lineList.ForEach(line =>
             {
                 Console.WriteLine((int)(line.Length / LengthSum * 255));
-                palletList.Add(new Pallet(line.End, (int)(line.Length / LengthSum * 255)));
+                palletList.Add(new Pallet(line.End, (byte)(line.Length / LengthSum * 255)));
             });
             return palletList;
         }
@@ -237,15 +272,11 @@ namespace GS
 
             stopwatch.Start();
 
-            pixelList.OrderBy(pixel => pixel.Color.AsInt());
-
-            stopwatch.Stop();
-            Console.WriteLine("Pixel Sort: " + stopwatch.Elapsed.ToString());
-            stopwatch.Start();
+            pixelList = new List<Pixel>(pixelList.OrderBy(pixel => pixel.Color.AsInt()));
 
             int i;
 
-            while (pixelList.Count > 0)
+            while (pixelList.Any())
             {
                 for(i = 0; i < pixelList.Count - 1; i++)
                 {
@@ -253,7 +284,7 @@ namespace GS
                         break;
                 }
 
-                ChunkList.Add(new ColorChunk(pixelList[0].Color, i + 1));
+                ChunkList.Add(new ColorChunk(pixelList.First().Color, i + 1));
 
                 pixelList.RemoveRange(0, i + 1);
 
@@ -263,8 +294,7 @@ namespace GS
             stopwatch.Restart();
 
             // Sort by Count
-            ChunkList.Sort((a, b) => b.Count - a.Count);
-            //ChunkList.OrderBy(chunk => chunk.PixelList.Count);
+            ChunkList = new List<ColorChunk>(ChunkList.OrderBy(chunk => chunk.Count));
 
             ColorList = ChunkList.Select(chunk => chunk.Color).ToList();
 

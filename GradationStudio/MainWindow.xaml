@@ -6,10 +6,21 @@
         xmlns:local="clr-namespace:GradationStudio"
         mc:Ignorable="d"
         Title="GradationStudio" FontSize="16"
-        SizeToContent="WidthAndHeight" MinHeight="0" MinWidth="225" MaxWidth="225" ResizeMode="CanResize">
-    <ScrollViewer>
-        <StackPanel x:Name="PaletteGrid">
-            <Button x:Name="InitButton" Click="InitButton_Click" Height="60" Content="Load Image"/>
-        </StackPanel>
-    </ScrollViewer>
+        SizeToContent="WidthAndHeight" MinHeight="0" ResizeMode="CanResize">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="225"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <ScrollViewer Grid.Column="0">
+            <StackPanel x:Name="PaletteGrid">
+                <Button x:Name="InitButton" Click="InitButton_Click" Height="60" Content="Load Image"/>
+            </StackPanel>
+        </ScrollViewer>
+        <DockPanel Grid.Column="1">
+            <Image x:Name="RG" DockPanel.Dock="Left" Width="512" Height="512"/>
+            <Image x:Name="GB" DockPanel.Dock="Left" Width="512" Height="512"/>
+            <Image x:Name="BR" DockPanel.Dock="Bottom" Width="512" Height="512"/>
+        </DockPanel>
+    </Grid>
 </Window>
