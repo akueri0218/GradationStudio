@@ -24,7 +24,7 @@ namespace GradationStudio
     /// </summary>
     public partial class MainWindow : Window
     {
-        private BMP bmp = new BMP("../../img/asami0.jpg");
+        private BMP bmp = new BMP(@"C:\Windows\Fujitsu\wallpaper\2560-1440\FJPC003.png");
         private ColorMap map;
 
         //private Gradation gradation;

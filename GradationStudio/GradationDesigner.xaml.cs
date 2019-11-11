@@ -77,7 +77,7 @@ namespace GradationStudio
             InitializeComponent();
         }
 
-        private void color_Delete(object sender, RoutedEventArgs e)
+        private void colorDelete(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
 
@@ -101,105 +101,22 @@ namespace GradationStudio
         }
         private void AddColor_Click(object sender, RoutedEventArgs e)
         {
-            ColorIndex color = new ColorIndex(pallet, color_Delete);
+            ColorIndex color = new ColorIndex(pallet, colorDelete);
 
             colorList.Add(color);
             colorIndex.Children.Add(color.Panel);
 
             pallet = new Pallet(new GSColor(255, 255, 255), 0);
 
-            editR.Text = "255";
-            editR.Background = new SolidColorBrush(Color.FromRgb(255, 0, 0));
-            editG.Text = "255";
-            editG.Background = new SolidColorBrush(Color.FromRgb(0, 255, 0));
-            editB.Text = "255";
-            editB.Background = new SolidColorBrush(Color.FromRgb(0, 0, 255));
-
-            editColor_Changed();
-
             UpdateGradation();
         }
 
-        private void editR_Changed(object sender, TextChangedEventArgs e)
+        private void colorChanged(object sender, RoutedEventArgs e)
         {
-            TextBox textBox = (TextBox)sender;
 
-            if (textBox.Text == "")
-                return;
-
-            int output;
-
-            if (!int.TryParse(textBox.Text, out output))
-                return;
-
-            if (output >= 256)
-                return;
-
-            byte r = byte.Parse(textBox.Text);
-
-
-            textBox.Background = new SolidColorBrush(Color.FromRgb(r, 0, 0));
-
-            pallet.Color.R = r;
-
-            editColor_Changed();
         }
 
-        private void editG_Changed(object sender, TextChangedEventArgs e)
-        {
-            TextBox textBox = (TextBox)sender;
-
-            if (textBox.Text == "")
-                return;
-
-            int output;
-
-            if (!int.TryParse(textBox.Text, out output))
-                return;
-
-            if (output >= 256)
-                return;
-
-            byte g = byte.Parse(textBox.Text);
-
-
-            textBox.Background = new SolidColorBrush(Color.FromRgb(0, g, 0));
-
-            pallet.Color.G = g;
-
-            editColor_Changed();
-        }
-
-        private void editB_Changed(object sender, TextChangedEventArgs e)
-        {
-            TextBox textBox = (TextBox)sender;
-
-            if (textBox.Text == "")
-                return;
-
-            int output;
-
-            if (!int.TryParse(textBox.Text, out output))
-                return;
-
-            if (output >= 256)
-                return;
-
-            byte b = byte.Parse(textBox.Text);
-
-            textBox.Background = new SolidColorBrush(Color.FromRgb(0, 0, b));
-
-            pallet.Color.B = b;
-
-            editColor_Changed();
-        }
-
-        private void editColor_Changed()
-        {
-            editColor.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
-        }
-
-        private void editOffset_Changed(object sender, TextChangedEventArgs e)
+        private void offsetChanged(object sender, TextChangedEventArgs e)
         {
             TextBox textBox = (TextBox)sender;
 
@@ -241,7 +158,7 @@ namespace GradationStudio
 
         private void GRDLoad_Click(object sender, RoutedEventArgs e)
         {
-            string filename = OpenDialog("gradation files (*.grd)|*.grd");
+            string filename = FileDialog("gradation files (*.grd)|*.grd");
         }
 
         private void GRDSave_Click(object sender, RoutedEventArgs e)
@@ -256,14 +173,14 @@ namespace GradationStudio
 
         private void ImgOpen_Click(object sender, RoutedEventArgs e)
         {
-            string filename = OpenDialog("image files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp");
+            string filename = FileDialog("image files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp");
 
+            SourceImage = new WriteableBitmap(new BitmapImage(new Uri(@filename)));
 
-
-            image.Source = new BitmapImage(new Uri(@filename));
+            image.Source = SourceImage;
         }
 
-        private string OpenDialog(string filter)
+        private string FileDialog(string filter)
         {
             fileDialog = new OpenFileDialog();
 

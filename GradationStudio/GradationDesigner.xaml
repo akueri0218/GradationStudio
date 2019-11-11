@@ -17,16 +17,16 @@
             <RowDefinition Height="70"/>
         </Grid.RowDefinitions>
 
-        <Menu HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="DimGray">
-            <MenuItem Foreground="White" Header="File">
-                <MenuItem Background="Gray" Header="Open" Click="ImgOpen_Click"/>
-                <MenuItem Background="Gray" Header="Save"/>
-                <MenuItem Background="Gray" Header="Close"/>
-                <MenuItem Background="Gray" Header="Exit"/>
+        <Menu HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+            <MenuItem Header="File">
+                <MenuItem Header="Open" Click="ImgOpen_Click"/>
+                <MenuItem Header="Save"/>
+                <MenuItem Header="Close"/>
+                <MenuItem Header="Exit"/>
             </MenuItem>
-            <MenuItem Foreground="White" Header="View">
-                <MenuItem Background="Gray" Header="GrayScale" IsCheckable="True"/>
-                <MenuItem Background="Gray" Header="Color" IsCheckable="True" IsChecked="True"/>
+            <MenuItem Header="View">
+                <MenuItem Header="GrayScale" IsCheckable="True"/>
+                <MenuItem Header="Color" IsCheckable="True" IsChecked="True"/>
             </MenuItem>
         </Menu>
 
@@ -40,29 +40,32 @@
             <DockPanel DockPanel.Dock="Top" Height="30" Background="LightGray">
                 <Border Width="30" Background="Transparent" BorderBrush="Black" BorderThickness="2"/>
                 <Label Width="120" Content="Color" VerticalContentAlignment="Center"/>
-                <Label Content="Offset" Width="70" VerticalContentAlignment="Center"/>
+                <Label Content="Offset" Width="110" VerticalContentAlignment="Center"/>
                 <Border Width="30" Height="30"/>
             </DockPanel>
 
             <!--color manager-->
-            <DockPanel DockPanel.Dock="Bottom" Height="30" Background="LightGray">
-                <Border x:Name="editColor" Width="30" Background="White" BorderBrush="Black" BorderThickness="2"/>
-                <TextBox x:Name="editR" TextChanged="editR_Changed" Margin="0" Text="255" Foreground="White" Background="#FF0000" Width="40" VerticalContentAlignment="Center"/>
-                <TextBox x:Name="editG" TextChanged="editG_Changed" Margin="0" Text="255" Foreground="White" Background="#00FF00" Width="40" VerticalContentAlignment="Center"/>
-                <TextBox x:Name="editB" TextChanged="editB_Changed" Margin="0" Text="255" Foreground="White" Background="#0000FF" Width="40" VerticalContentAlignment="Center"/>
-                <TextBox x:Name="editOffset" TextChanged="editOffset_Changed" Margin="0" Width="70" VerticalContentAlignment="Center"/>
-                <Button Click="AddColor_Click" Width="30" Height="30" Background="Transparent" Padding="0" BorderThickness="0">
-                    <Border Background="DarkGray" CornerRadius="5" BorderBrush="Gray" Padding="2">
-                        <Path Stroke="White" StrokeThickness="5">
-                            <Path.Data>
-                                <GeometryGroup>
-                                    <LineGeometry StartPoint="13 0" EndPoint="13 28"/>
-                                    <LineGeometry StartPoint="0 13" EndPoint="28 13"/>
-                                </GeometryGroup>
-                            </Path.Data>
-                        </Path>
-                    </Border>
-                </Button>
+            <DockPanel DockPanel.Dock="Bottom" Height="120" Background="LightGray">
+                <Slider DockPanel.Dock="Top" Height="30" VerticalAlignment="Top"/>
+                <Slider DockPanel.Dock="Top" Height="30" VerticalAlignment="Top"/>
+                <Slider DockPanel.Dock="Top" Height="30" VerticalAlignment="Top"/>
+
+                <DockPanel DockPanel.Dock="Bottom" Background="LightSlateGray" VerticalAlignment="Bottom"  Height="30">
+                    <Button Click="AddColor_Click" DockPanel.Dock="Left" Width="30" Height="30" Background="Transparent" Padding="0" BorderThickness="0">
+                        <Border Background="DarkGray" BorderBrush="Gray" Padding="2">
+                            <Path Stroke="White" StrokeThickness="5">
+                                <Path.Data>
+                                    <GeometryGroup>
+                                        <LineGeometry StartPoint="13 0" EndPoint="13 28"/>
+                                        <LineGeometry StartPoint="0 13" EndPoint="28 13"/>
+                                    </GeometryGroup>
+                                </Path.Data>
+                            </Path>
+                        </Border>
+                    </Button>
+                    <TextBox x:Name="editOffset" DockPanel.Dock="Right" TextChanged="offsetChanged" Text="0.0" Width="50" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                    <Label Content="Offset:" Margin="0" Width="60" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
+                </DockPanel>
             </DockPanel>
 
             <StackPanel x:Name="colorIndex" Grid.Row="1" Grid.Column="1">
