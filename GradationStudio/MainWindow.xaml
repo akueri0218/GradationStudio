@@ -5,22 +5,78 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GradationStudio"
         mc:Ignorable="d"
-        Title="GradationStudio" FontSize="16"
-        SizeToContent="WidthAndHeight" MinHeight="0" ResizeMode="CanResize">
+        Title="GradationDesigner" MinHeight="640" MinWidth="840" Width="640" Height="840">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="225"/>
-            <ColumnDefinition/>
+            <ColumnDefinition MinWidth="520"/>
+            <ColumnDefinition Width="310"/>
         </Grid.ColumnDefinitions>
-        <ScrollViewer Grid.Column="0">
-            <StackPanel x:Name="PaletteGrid">
-                <Button x:Name="InitButton" Click="InitButton_Click" Height="60" Content="Load Image"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition MinHeight="520"/>
+            <RowDefinition Height="70"/>
+        </Grid.RowDefinitions>
+
+        <Menu HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+            <MenuItem Header="File">
+                <MenuItem Header="Open" Click="ImgOpen_Click"/>
+                <MenuItem Header="Save"/>
+                <MenuItem Header="Close"/>
+                <MenuItem Header="Exit"/>
+            </MenuItem>
+            <MenuItem Header="View">
+                <MenuItem Header="GrayScale" IsCheckable="True"/>
+                <MenuItem Header="Color" IsCheckable="True" IsChecked="True"/>
+            </MenuItem>
+        </Menu>
+
+        <Image x:Name="image" Grid.Row="1" Grid.Column="0"/>
+
+        <!--gradation manager-->
+        <DockPanel Grid.Row="1" Grid.Column="1">
+            <Rectangle x:Name="grdBar" HorizontalAlignment="Left" Fill="DarkGray" Width="50" Grid.Row="1" Grid.Column="1"/>
+
+            <!--gradation label-->
+            <DockPanel DockPanel.Dock="Top" Height="30" Background="LightGray">
+                <Border Width="30" Background="Transparent" BorderBrush="Black" BorderThickness="2"/>
+                <Label Width="120" Content="Color" VerticalContentAlignment="Center"/>
+                <Label Content="Offset" Width="110" VerticalContentAlignment="Center"/>
+                <Border Width="30" Height="30"/>
+            </DockPanel>
+
+            <!--color manager-->
+            <DockPanel DockPanel.Dock="Bottom" Height="130" Background="LightGray">
+                <Slider DockPanel.Dock="Top" Height="30" VerticalAlignment="Top" Margin="5 0 10 0" TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1"/>
+                <Slider DockPanel.Dock="Top" Height="30" VerticalAlignment="Top" Margin="5 0 10 0" TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1"/>
+                <Slider DockPanel.Dock="Top" Height="30" VerticalAlignment="Top" Margin="5 0 10 0" TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1"/>
+
+                <DockPanel DockPanel.Dock="Bottom" Background="LightSlateGray" VerticalAlignment="Bottom"  Height="40">
+                    <Button Click="AddColor_Click" DockPanel.Dock="Left" Width="30" Height="30" Background="Transparent" Padding="0" Margin="5 0 0 0" BorderThickness="0">
+                        <Border Background="DarkGray" BorderBrush="Gray" Padding="2">
+                            <Path Stroke="White" StrokeThickness="5">
+                                <Path.Data>
+                                    <GeometryGroup>
+                                        <LineGeometry StartPoint="13 0" EndPoint="13 28"/>
+                                        <LineGeometry StartPoint="0 13" EndPoint="28 13"/>
+                                    </GeometryGroup>
+                                </Path.Data>
+                            </Path>
+                        </Border>
+                    </Button>
+                    <TextBox x:Name="editOffset" DockPanel.Dock="Right" TextChanged="offsetChanged" Margin="0 0 10 0" Text="0.0" Width="60" Height="30" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                    <Label Content="Offset:" Margin="0" Width="60" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
+                </DockPanel>
+            </DockPanel>
+
+            <StackPanel x:Name="colorIndex" Grid.Row="1" Grid.Column="1">
+
             </StackPanel>
-        </ScrollViewer>
-        <DockPanel Grid.Column="1">
-            <Image x:Name="RG" DockPanel.Dock="Left" Width="512" Height="512"/>
-            <Image x:Name="GB" DockPanel.Dock="Left" Width="512" Height="512"/>
-            <Image x:Name="BR" DockPanel.Dock="Bottom" Width="512" Height="512"/>
         </DockPanel>
+
+        <Grid Grid.Row="2" Grid.Column="1" Background="LightGray">
+            <Button Click="GRDLoad_Click" Content="Load" Width="64" Height="24" HorizontalAlignment="Left" Margin="32 0 0 0"/>
+            <Button Click="GRDSave_Click" Content="Save" Width="64" Height="24" HorizontalAlignment="Center"/>
+            <Button Click="GRDApply_Click" Content="Apply" Width="64" Height="24" HorizontalAlignment="Right" Margin="0 0 32 0"/>
+        </Grid>
     </Grid>
 </Window>
