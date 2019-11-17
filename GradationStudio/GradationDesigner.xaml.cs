@@ -221,7 +221,6 @@ namespace GradationStudio
         {
             colorList.OrderBy(item => item.Pallet.Pos); 
 
-
             LinearGradientBrush gradient = new LinearGradientBrush();
             gradient.StartPoint = new Point(0, 0);
             gradient.EndPoint = new Point(0, 1);

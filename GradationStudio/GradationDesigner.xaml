@@ -17,16 +17,16 @@
             <RowDefinition Height="70"/>
         </Grid.RowDefinitions>
 
-        <Menu HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="DimGray">
-            <MenuItem Foreground="White" Header="File">
-                <MenuItem Background="Gray" Header="Open" Click="ImgOpen_Click"/>
-                <MenuItem Background="Gray" Header="Save"/>
-                <MenuItem Background="Gray" Header="Close"/>
-                <MenuItem Background="Gray" Header="Exit"/>
+        <Menu HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+            <MenuItem Header="File">
+                <MenuItem Header="Open" Click="ImgOpen_Click"/>
+                <MenuItem Header="Save"/>
+                <MenuItem Header="Close"/>
+                <MenuItem Header="Exit"/>
             </MenuItem>
-            <MenuItem Foreground="White" Header="View">
-                <MenuItem Background="Gray" Header="GrayScale" IsCheckable="True"/>
-                <MenuItem Background="Gray" Header="Color" IsCheckable="True" IsChecked="True"/>
+            <MenuItem Header="View">
+                <MenuItem Header="GrayScale" IsCheckable="True"/>
+                <MenuItem Header="Color" IsCheckable="True" IsChecked="True"/>
             </MenuItem>
         </Menu>
 
