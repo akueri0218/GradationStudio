@@ -200,7 +200,11 @@ namespace GradationStudio
             Pallet p1 = colorList.Last().Pallet;
             Pallet p2 = colorList.Last().Pallet;
 
-            for (int i = 0; i < colorList.Count; i++)
+            byte R;
+            byte G;
+            byte B;
+
+            for (int i = 1; i < colorList.Count; i++)
             {
                 if (colorList[i].Pallet.Pos > index)
                 {
@@ -209,20 +213,29 @@ namespace GradationStudio
                 }
             }
 
-            //内聞して求める
+            int m = index - p1.Pos;
+            int n = p2.Pos - index + 1;
+            int size = m + n;
+
+            //division
+            R = (byte)((n * p1.Color.R + m * p2.Color.R) / size);
+            G = (byte)((n * p1.Color.G + m * p2.Color.G) / size);
+            B = (byte)((n * p1.Color.B + m * p2.Color.B) / size);
+
+            return new GSColor(R, G, B);
         }
 
         private void GRDApply_Click(object sender, RoutedEventArgs e)
         {
             if (SourceImage == null)
                 return;
+            if (!colorList.Any())
+                return;
 
             List<Pixel> pixels = new List<Pixel>();
 
             foreach (Pixel pixel in SourceImage.Pixels)
-            {
-                pixels.Add(new Pixel(pixel.Pos, [(pixel.Color.R + pixel.Color.G + pixel.Color.B) / 3]));
-            }
+                pixels.Add(new Pixel(pixel.Pos, getGradationColor((byte)((pixel.Color.R + pixel.Color.G + pixel.Color.B) / 3))));
         
             ResultImage = BitmapSource.Create(SourceImage.Width, SourceImage.Height, SourceImage.DpiX, SourceImage.DpiY, PixelFormats.Pbgra32, null, BMP.ExportPixel(pixels.ToArray(), SourceImage.Width, SourceImage.Height), SourceImage.Stride);
 
