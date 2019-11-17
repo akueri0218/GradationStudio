@@ -204,9 +204,11 @@ namespace GradationStudio
             byte G;
             byte B;
 
-            for (int i = 1; i < colorList.Count; i++)
+            for (int i = 0; i < colorList.Count; i++)
             {
-                if (colorList[i].Pallet.Pos > index)
+                if(colorList[i].Pallet.Pos == index)
+                    return colorList[i].Pallet.Color;
+                if (i > 0 && colorList[i].Pallet.Pos > index)
                 {
                     p1 = colorList[i - 1].Pallet;
                     p2 = colorList[i].Pallet;
