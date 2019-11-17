@@ -18,7 +18,7 @@ namespace GS_Files
 
             try
             {
-                writer.Write('B');
+                writer.Write('G');
                 writer.Write('R');
                 writer.Write(2 + 4 + 2 + pallets.Count * (2 + 1 + 1 + 1));//file size
                 writer.Write((short)pallets.Count);//color count
@@ -49,7 +49,7 @@ namespace GS_Files
 
             try
             {
-                if (reader.ReadChar() != 'B')
+                if (reader.ReadChar() != 'G')
                     return null;
                 if (reader.ReadChar() != 'R')
                     return null;
