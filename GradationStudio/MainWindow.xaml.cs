@@ -71,8 +71,9 @@ namespace GradationStudio
         List<ColorIndex> colorList = new List<ColorIndex>();
         Pallet pallet = new Pallet(new GSColor(255, 255, 255), 0);
 
-        WriteableBitmap SourceImage;
-        OpenFileDialog fileDialog;
+        BMP SourceImage;
+
+        BitmapSource ResultImage;
 
         public MainWindow()
         {
@@ -94,28 +95,30 @@ namespace GradationStudio
             colorList.RemoveAll(item => item.Pallet.Color.Equals(color) && item.Pallet.Pos == offset);
 
             colorIndex.Children.Clear();
-            colorList.ForEach(item =>
-            {
-                colorIndex.Children.Add(item.Panel);
-            });
+            colorList.ForEach(item => colorIndex.Children.Add(item.Panel));
 
             UpdateGradation();
         }
         private void AddColor_Click(object sender, RoutedEventArgs e)
         {
+            if (colorList.Find(item => item.Pallet.Pos == pallet.Pos) != null)
+            {
+                //ERROR
+                return;
+            }
+
             ColorIndex color = new ColorIndex(pallet, colorDelete);
 
             colorList.Add(color);
-            colorIndex.Children.Add(color.Panel);
 
-            pallet = new Pallet(new GSColor(255, 255, 255), 0);
+            colorList.Sort((a, b) => a.Pallet.Pos - b.Pallet.Pos);
+
+            colorIndex.Children.Clear();
+            colorList.ForEach(item => colorIndex.Children.Add(item.Panel));
+
+            pallet = new Pallet(new GSColor((byte)SliderR.Value, (byte)SliderG.Value, (byte)SliderB.Value), 0);
 
             UpdateGradation();
-        }
-
-        private void colorChanged(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void offsetChanged(object sender, TextChangedEventArgs e)
@@ -154,37 +157,92 @@ namespace GradationStudio
                 gradient.GradientStops.Add(stop);
             });
 
-
             grdBar.Fill = gradient;
         }
 
         private void GRDLoad_Click(object sender, RoutedEventArgs e)
         {
-            string filename = FileDialog("gradation files (*.grd)|*.grd");
+            string filename = FileDialog_Open("gradation files (*.grd)|*.grd");
+
+            List<Pallet> pallets = GRD.Load(filename);
+
+            colorList.Clear();
+            colorIndex.Children.Clear();
+
+            pallets.ForEach(item => colorList.Add(new ColorIndex(item, colorDelete)));
+
+            colorList.Sort((a, b) => a.Pallet.Pos - b.Pallet.Pos);
+
+            colorIndex.Children.Clear();
+            colorList.ForEach(item => colorIndex.Children.Add(item.Panel));
+
+            UpdateGradation();
         }
 
         private void GRDSave_Click(object sender, RoutedEventArgs e)
         {
+            string filename = FileDialog_Save("gradation files (*.grd)|*.grd");
 
+            List<Pallet> pallets = new List<Pallet>();
+
+            colorList.ForEach(item =>
+            {
+                pallets.Add(item.Pallet);
+            });
+
+            GRD.Export(filename, pallets);
+        }
+
+        private GSColor getGradationColor(byte index)
+        {
+            colorList.Sort((a, b) => a.Pallet.Pos - b.Pallet.Pos);
+
+            Pallet p1 = colorList.Last().Pallet;
+            Pallet p2 = colorList.Last().Pallet;
+
+            for (int i = 0; i < colorList.Count; i++)
+            {
+                if (colorList[i].Pallet.Pos > index)
+                {
+                    p1 = colorList[i - 1].Pallet;
+                    p2 = colorList[i].Pallet;
+                }
+            }
+
+            //内聞して求める
         }
 
         private void GRDApply_Click(object sender, RoutedEventArgs e)
         {
+            if (SourceImage == null)
+                return;
+
+            List<Pixel> pixels = new List<Pixel>();
+
+            foreach (Pixel pixel in SourceImage.Pixels)
+            {
+                pixels.Add(new Pixel(pixel.Pos, [(pixel.Color.R + pixel.Color.G + pixel.Color.B) / 3]));
+            }
+        
+            ResultImage = BitmapSource.Create(SourceImage.Width, SourceImage.Height, SourceImage.DpiX, SourceImage.DpiY, PixelFormats.Pbgra32, null, BMP.ExportPixel(pixels.ToArray(), SourceImage.Width, SourceImage.Height), SourceImage.Stride);
+
+            image.Source = ResultImage;
+
 
         }
 
         private void ImgOpen_Click(object sender, RoutedEventArgs e)
         {
-            string filename = FileDialog("image files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp");
+            string filename = FileDialog_Open("image files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp");
 
-            SourceImage = new WriteableBitmap(new BitmapImage(new Uri(@filename)));
+            SourceImage = new BMP(filename);
 
-            image.Source = SourceImage;
+            image.Source = SourceImage.ExportSource();
         }
 
-        private string FileDialog(string filter)
+        private string FileDialog_Open(string filter)
         {
-            fileDialog = new OpenFileDialog();
+            OpenFileDialog fileDialog = new OpenFileDialog();
 
             fileDialog.Filter = filter;
 
@@ -192,6 +250,61 @@ namespace GradationStudio
                 return null;
 
             return fileDialog.FileName;
+        }
+
+        private string FileDialog_Save(string filter)
+        {
+            SaveFileDialog fileDialog = new SaveFileDialog();
+
+            fileDialog.Filter = filter;
+
+            if (fileDialog.ShowDialog() == false)
+                return null;
+
+            return fileDialog.FileName;
+        }
+
+        private void SliderR_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Slider slider = (Slider)sender;
+
+            try
+            {
+                LabelR.Content = (byte)slider.Value;
+
+                pallet.Color.R = (byte)slider.Value;
+
+                Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
+            }
+            catch { }
+        }
+        private void SliderG_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Slider slider = (Slider)sender;
+
+            try
+            {
+                LabelG.Content = (byte)slider.Value;
+
+                pallet.Color.G = (byte)slider.Value;
+
+                Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
+            }
+            catch { }
+        }
+        private void SliderB_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Slider slider = (Slider)sender;
+
+            try
+            {
+                LabelB.Content = (byte)slider.Value;
+
+                pallet.Color.B = (byte)slider.Value;
+
+                Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
+            }
+            catch { }
         }
     }
 }

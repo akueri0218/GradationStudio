@@ -223,6 +223,11 @@ namespace GS_BMP
             }
         }
 
+        public BitmapSource ExportSource()
+        {
+            return BitmapSource.Create(Width, Height, DpiX, DpiY, PixelFormats.Pbgra32, null, ExportPixel(Pixels, Width, Height), Stride);
+        }
+
         public BMP(string path)
         {
             Path = path;

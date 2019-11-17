@@ -45,12 +45,24 @@
             </DockPanel>
 
             <!--color manager-->
-            <DockPanel DockPanel.Dock="Bottom" Height="130" Background="LightGray">
-                <Slider DockPanel.Dock="Top" Height="30" VerticalAlignment="Top" Margin="5 0 10 0" TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1"/>
-                <Slider DockPanel.Dock="Top" Height="30" VerticalAlignment="Top" Margin="5 0 10 0" TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1"/>
-                <Slider DockPanel.Dock="Top" Height="30" VerticalAlignment="Top" Margin="5 0 10 0" TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1"/>
+            <DockPanel DockPanel.Dock="Bottom" Height="130" Width="260" Background="LightGray">
+                <DockPanel DockPanel.Dock="Top">
+                    <Slider x:Name="SliderR" ValueChanged="SliderR_Changed" Height="30" Width="210" Foreground="#FF0000" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
+                            TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1" SmallChange="1" LargeChange="1" Value="255"/>
+                    <Label x:Name="LabelR" Height="30" Width="30" Content="255" VerticalContentAlignment="Center"/>
+                </DockPanel>
+                <DockPanel DockPanel.Dock="Top">
+                    <Slider x:Name="SliderG" ValueChanged="SliderG_Changed" Height="30" Width="210" Foreground="#00FF00" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
+                            TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1" SmallChange="1" LargeChange="1" Value="255"/>
+                    <Label x:Name="LabelG" Height="30" Width="30" Content="255" VerticalContentAlignment="Center"/>
+                </DockPanel>
+                <DockPanel DockPanel.Dock="Top">
+                    <Slider x:Name="SliderB"  ValueChanged="SliderB_Changed" Height="30" Width="210" Foreground="#0000FF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
+                            TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1" SmallChange="1" LargeChange="1" Value="255"/>
+                    <Label x:Name="LabelB" Height="30" Width="30" Content="255" VerticalContentAlignment="Center"/>
+                </DockPanel>
 
-                <DockPanel DockPanel.Dock="Bottom" Background="LightSlateGray" VerticalAlignment="Bottom"  Height="40">
+                <DockPanel x:Name="Preview" DockPanel.Dock="Left" Background="White" VerticalAlignment="Bottom"  Height="40">
                     <Button Click="AddColor_Click" DockPanel.Dock="Left" Width="30" Height="30" Background="Transparent" Padding="0" Margin="5 0 0 0" BorderThickness="0">
                         <Border Background="DarkGray" BorderBrush="Gray" Padding="2">
                             <Path Stroke="White" StrokeThickness="5">
@@ -63,8 +75,8 @@
                             </Path>
                         </Border>
                     </Button>
-                    <TextBox x:Name="editOffset" DockPanel.Dock="Right" TextChanged="offsetChanged" Margin="0 0 10 0" Text="0.0" Width="60" Height="30" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-                    <Label Content="Offset:" Margin="0" Width="60" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
+                    <TextBox x:Name="editOffset" DockPanel.Dock="Right" TextChanged="offsetChanged" Margin="0 0 10 0" Text="0" Width="60" Height="30" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                    <Label Content="Offset:" Margin="0" Width="60" Height="30" Background="LightGray" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
                 </DockPanel>
             </DockPanel>
 
