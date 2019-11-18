@@ -208,10 +208,15 @@ namespace GradationStudio
             {
                 if(colorList[i].Pallet.Pos == index)
                     return colorList[i].Pallet.Color;
-                if (i > 0 && colorList[i].Pallet.Pos > index)
+                if (colorList[i].Pallet.Pos < index)
                 {
-                    p1 = colorList[i - 1].Pallet;
+                    p1 = colorList[i].Pallet;
+                    p2 = p1;
+                }
+                if(colorList[i].Pallet.Pos > index)
+                {
                     p2 = colorList[i].Pallet;
+                    break;
                 }
             }
 
@@ -220,9 +225,9 @@ namespace GradationStudio
             int size = m + n;
 
             //division
-            R = (byte)((n * p1.Color.R + m * p2.Color.R) / size);
-            G = (byte)((n * p1.Color.G + m * p2.Color.G) / size);
-            B = (byte)((n * p1.Color.B + m * p2.Color.B) / size);
+            R = (byte)Math.Round((double)(n * p1.Color.R + m * p2.Color.R) / size);
+            G = (byte)Math.Round((double)(n * p1.Color.G + m * p2.Color.G) / size);
+            B = (byte)Math.Round((double)(n * p1.Color.B + m * p2.Color.B) / size);
 
             return new GSColor(R, G, B);
         }
