@@ -20,16 +20,13 @@
         <Menu HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
             <MenuItem Header="File">
                 <MenuItem Header="Open" Click="ImgOpen_Click"/>
-                <MenuItem Header="Save"/>
-                <MenuItem Header="Close"/>
-                <MenuItem Header="Exit"/>
-            </MenuItem>
-            <MenuItem Header="View">
-                <MenuItem Header="GrayScale" IsCheckable="True"/>
-                <MenuItem Header="Color" IsCheckable="True" IsChecked="True"/>
+                <MenuItem Header="Save" Click="ImgSave_Click"/>
+                <MenuItem Header="Close" Click="ImgClose_Click"/>
+                <MenuItem Header="Exit" Click="Exit_Click"/>
             </MenuItem>
         </Menu>
 
+        <!--image-->
         <Image x:Name="image" Grid.Row="1" Grid.Column="0"/>
 
         <!--gradation manager-->
@@ -46,6 +43,7 @@
 
             <!--color manager-->
             <DockPanel DockPanel.Dock="Bottom" Height="130" Width="260" Background="LightGray">
+                <!--slider-->
                 <DockPanel DockPanel.Dock="Top">
                     <Slider x:Name="SliderR" ValueChanged="SliderR_Changed" Height="30" Width="210" Foreground="#FF0000" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
                             TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1" SmallChange="1" LargeChange="1" Value="255"/>
@@ -75,7 +73,7 @@
                             </Path>
                         </Border>
                     </Button>
-                    <TextBox x:Name="editOffset" DockPanel.Dock="Right" TextChanged="offsetChanged" Margin="0 0 10 0" Text="0" Width="60" Height="30" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                    <TextBox x:Name="offsetText" DockPanel.Dock="Right" TextChanged="offsetChanged" Margin="0 0 10 0" Text="0" Width="60" Height="30" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
                     <Label Content="Offset:" Margin="0" Width="60" Height="30" Background="LightGray" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
                 </DockPanel>
             </DockPanel>

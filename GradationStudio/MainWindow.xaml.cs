@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -75,6 +76,8 @@ namespace GradationStudio
 
         BitmapSource ResultImage;
 
+        bool isSaved = true;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -116,7 +119,7 @@ namespace GradationStudio
             colorIndex.Children.Clear();
             colorList.ForEach(item => colorIndex.Children.Add(item.Panel));
 
-            pallet = new Pallet(new GSColor((byte)SliderR.Value, (byte)SliderG.Value, (byte)SliderB.Value), 0);
+            pallet = new Pallet(new GSColor((byte)SliderR.Value, (byte)SliderG.Value, (byte)SliderB.Value), pallet.Pos);
 
             UpdateGradation();
         }
@@ -197,8 +200,8 @@ namespace GradationStudio
         {
             colorList.Sort((a, b) => a.Pallet.Pos - b.Pallet.Pos);
 
-            Pallet p1 = colorList.Last().Pallet;
-            Pallet p2 = colorList.Last().Pallet;
+            Pallet p1 = colorList.First().Pallet;
+            Pallet p2 = colorList.First().Pallet;
 
             byte R;
             byte G;
@@ -218,6 +221,12 @@ namespace GradationStudio
                     p2 = colorList[i].Pallet;
                     break;
                 }
+            }
+
+            if(index > colorList.Last().Pallet.Pos)
+            {
+                p1 = colorList.Last().Pallet;
+                p2 = colorList.Last().Pallet;
             }
 
             int m = index - p1.Pos;
@@ -247,8 +256,6 @@ namespace GradationStudio
             ResultImage = BitmapSource.Create(SourceImage.Width, SourceImage.Height, SourceImage.DpiX, SourceImage.DpiY, PixelFormats.Pbgra32, null, BMP.ExportPixel(pixels.ToArray(), SourceImage.Width, SourceImage.Height), SourceImage.Stride);
 
             image.Source = ResultImage;
-
-
         }
 
         private void ImgOpen_Click(object sender, RoutedEventArgs e)
@@ -258,6 +265,90 @@ namespace GradationStudio
             SourceImage = new BMP(filename);
 
             image.Source = SourceImage.ExportSource();
+
+            isSaved = false;
+        }
+
+        private void ImgSave_Click(object sender, RoutedEventArgs e)
+        {
+            isSaved = SaveImage();
+        }
+
+        private void ImgClose_Click(object sender, RoutedEventArgs e)
+        {
+            if (!isSaved)
+            {
+                MessageBoxResult result = CheckSave();
+
+                if(result == MessageBoxResult.Yes)
+                {
+                    SaveImage();
+                    image.Source = new BitmapImage();
+                    SourceImage = null;
+                }
+
+                if (result == MessageBoxResult.No)
+                {
+                    image.Source = new BitmapImage();
+                    SourceImage = null;
+                }
+
+                if(result == MessageBoxResult.Cancel)
+                {
+                    return;
+                }
+            }
+        }
+
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            if (!isSaved)
+            {
+                MessageBoxResult result = CheckSave();
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveImage();
+                }
+
+                if (result == MessageBoxResult.Cancel)
+                {
+                    return;
+                }
+            }
+
+            Application.Current.Shutdown();
+        }
+
+        private bool SaveImage()
+        {
+            if (ResultImage == null) return false;
+
+            SaveFileDialog dialog = new SaveFileDialog();
+
+            dialog.Filter = "PNG file(*.png)|*.png";
+
+            if (dialog.ShowDialog() == true)
+            {
+                using (FileStream filestream = new FileStream(dialog.FileName, FileMode.Create))
+                {
+                    PngBitmapEncoder encoder = new PngBitmapEncoder();
+
+                    encoder.Interlace = PngInterlaceOption.On;
+
+                    encoder.Frames.Add(BitmapFrame.Create(ResultImage));
+                    encoder.Save(filestream);
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private MessageBoxResult CheckSave()
+        {
+            return MessageBox.Show("Save image before closing?", "alert", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning, MessageBoxResult.Yes);
         }
 
         private string FileDialog_Open(string filter)
