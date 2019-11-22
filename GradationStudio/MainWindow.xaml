@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GradationStudio"
         mc:Ignorable="d"
-        Title="GradationDesigner" MinHeight="640" MinWidth="840" Width="640" Height="840">
+        Title="GradationDesigner" MinWidth="840" MinHeight="640" Width="840" Height="640">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="520"/>
