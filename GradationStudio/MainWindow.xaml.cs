@@ -105,10 +105,7 @@ namespace GradationStudio
         private void AddColor_Click(object sender, RoutedEventArgs e)
         {
             if (colorList.Find(item => item.Pallet.Pos == pallet.Pos) != null)
-            {
-                //ERROR
                 return;
-            }
 
             ColorIndex color = new ColorIndex(pallet, colorDelete);
 
@@ -146,7 +143,6 @@ namespace GradationStudio
         {
             colorList.OrderBy(item => item.Pallet.Pos);
 
-
             LinearGradientBrush gradient = new LinearGradientBrush();
             gradient.StartPoint = new Point(0, 0);
             gradient.EndPoint = new Point(0, 1);
@@ -167,6 +163,9 @@ namespace GradationStudio
         {
             string filename = FileDialog_Open("gradation files (*.grd)|*.grd");
 
+            if (filename == null)
+                return;
+
             List<Pallet> pallets = GRD.Load(filename);
 
             colorList.Clear();
@@ -185,6 +184,9 @@ namespace GradationStudio
         private void GRDSave_Click(object sender, RoutedEventArgs e)
         {
             string filename = FileDialog_Save("gradation files (*.grd)|*.grd");
+
+            if (filename == null)
+                return;
 
             List<Pallet> pallets = new List<Pallet>();
 
@@ -266,6 +268,9 @@ namespace GradationStudio
         private void ImgOpen_Click(object sender, RoutedEventArgs e)
         {
             string filename = FileDialog_Open("image files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp");
+
+            if (filename == null)
+                return;
 
             SourceImage = new BMP(filename);
 
