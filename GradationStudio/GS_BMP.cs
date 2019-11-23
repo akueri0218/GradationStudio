@@ -92,7 +92,7 @@ namespace GS_BMP
 
         public override string ToString()
         {
-            return this.R.ToString("X2") + this.G.ToString("X2") + this.B.ToString("X2");
+            return (this.A == 255 ? "" : this.A.ToString("X2")) + this.R.ToString("X2") + this.G.ToString("X2") + this.B.ToString("X2");
         }
 
         public override bool Equals(object obj)

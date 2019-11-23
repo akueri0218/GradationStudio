@@ -105,10 +105,7 @@ namespace GradationStudio
         private void AddColor_Click(object sender, RoutedEventArgs e)
         {
             if (colorList.Find(item => item.Pallet.Pos == pallet.Pos) != null)
-            {
-                //ERROR
                 return;
-            }
 
             ColorIndex color = new ColorIndex(pallet, colorDelete);
 
@@ -146,7 +143,6 @@ namespace GradationStudio
         {
             colorList.OrderBy(item => item.Pallet.Pos);
 
-
             LinearGradientBrush gradient = new LinearGradientBrush();
             gradient.StartPoint = new Point(0, 0);
             gradient.EndPoint = new Point(0, 1);
@@ -167,6 +163,9 @@ namespace GradationStudio
         {
             string filename = FileDialog_Open("gradation files (*.grd)|*.grd");
 
+            if (filename == null)
+                return;
+
             List<Pallet> pallets = GRD.Load(filename);
 
             colorList.Clear();
@@ -186,6 +185,9 @@ namespace GradationStudio
         {
             string filename = FileDialog_Save("gradation files (*.grd)|*.grd");
 
+            if (filename == null)
+                return;
+
             List<Pallet> pallets = new List<Pallet>();
 
             colorList.ForEach(item =>
@@ -196,12 +198,17 @@ namespace GradationStudio
             GRD.Export(filename, pallets);
         }
 
-        private GSColor getGradationColor(byte index)
+        private GSColor getGradationColor(Pixel pixel)
         {
             colorList.Sort((a, b) => a.Pallet.Pos - b.Pallet.Pos);
 
             Pallet p1 = colorList.First().Pallet;
             Pallet p2 = colorList.First().Pallet;
+
+            byte index = (byte)Math.Round(pixel.Color.R * 0.2126 + pixel.Color.G * 0.7152 + pixel.Color.B * 0.0722);
+
+            if (pixel.Color.A == 0)
+                return pixel.Color;
 
             byte R;
             byte G;
@@ -209,21 +216,21 @@ namespace GradationStudio
 
             for (int i = 0; i < colorList.Count; i++)
             {
-                if(colorList[i].Pallet.Pos == index)
-                    return colorList[i].Pallet.Color;
+                if (colorList[i].Pallet.Pos == index)
+                    return new GSColor(colorList[i].Pallet.Color.R, colorList[i].Pallet.Color.G, colorList[i].Pallet.Color.B, pixel.Color.A);
                 if (colorList[i].Pallet.Pos < index)
                 {
                     p1 = colorList[i].Pallet;
                     p2 = p1;
                 }
-                if(colorList[i].Pallet.Pos > index)
+                if (colorList[i].Pallet.Pos > index)
                 {
                     p2 = colorList[i].Pallet;
                     break;
                 }
             }
 
-            if(index > colorList.Last().Pallet.Pos)
+            if (index > colorList.Last().Pallet.Pos)
             {
                 p1 = colorList.Last().Pallet;
                 p2 = colorList.Last().Pallet;
@@ -234,11 +241,11 @@ namespace GradationStudio
             int size = m + n;
 
             //division
-            R = (byte)Math.Round((double)(n * p1.Color.R + m * p2.Color.R) / size);
-            G = (byte)Math.Round((double)(n * p1.Color.G + m * p2.Color.G) / size);
-            B = (byte)Math.Round((double)(n * p1.Color.B + m * p2.Color.B) / size);
+            R = (byte)Math.Round((double)(n * p1.Color.R + m * p2.Color.R) / size, 0);
+            G = (byte)Math.Round((double)(n * p1.Color.G + m * p2.Color.G) / size, 0);
+            B = (byte)Math.Round((double)(n * p1.Color.B + m * p2.Color.B) / size, 0);
 
-            return new GSColor(R, G, B);
+            return new GSColor(R, G, B, pixel.Color.A);
         }
 
         private void GRDApply_Click(object sender, RoutedEventArgs e)
@@ -251,8 +258,8 @@ namespace GradationStudio
             List<Pixel> pixels = new List<Pixel>();
 
             foreach (Pixel pixel in SourceImage.Pixels)
-                pixels.Add(new Pixel(pixel.Pos, getGradationColor((byte)((pixel.Color.R + pixel.Color.G + pixel.Color.B) / 3))));
-        
+                pixels.Add(new Pixel(pixel.Pos, getGradationColor(pixel)));
+
             ResultImage = BitmapSource.Create(SourceImage.Width, SourceImage.Height, SourceImage.DpiX, SourceImage.DpiY, PixelFormats.Pbgra32, null, BMP.ExportPixel(pixels.ToArray(), SourceImage.Width, SourceImage.Height), SourceImage.Stride);
 
             image.Source = ResultImage;
@@ -261,6 +268,9 @@ namespace GradationStudio
         private void ImgOpen_Click(object sender, RoutedEventArgs e)
         {
             string filename = FileDialog_Open("image files (*.png;*.jpg;*.bmp)|*.png;*.jpg;*.bmp");
+
+            if (filename == null)
+                return;
 
             SourceImage = new BMP(filename);
 
@@ -381,7 +391,7 @@ namespace GradationStudio
 
             try
             {
-                LabelR.Content = (byte)slider.Value;
+                LabelR.Text = ((byte)slider.Value).ToString();
 
                 pallet.Color.R = (byte)slider.Value;
 
@@ -395,7 +405,7 @@ namespace GradationStudio
 
             try
             {
-                LabelG.Content = (byte)slider.Value;
+                LabelG.Text = ((byte)slider.Value).ToString();
 
                 pallet.Color.G = (byte)slider.Value;
 
@@ -409,9 +419,87 @@ namespace GradationStudio
 
             try
             {
-                LabelB.Content = (byte)slider.Value;
+                LabelB.Text = ((byte)slider.Value).ToString();
 
                 pallet.Color.B = (byte)slider.Value;
+
+                Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
+            }
+            catch { }
+        }
+
+        private void Red_Changed(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+
+            if (textBox.Text == "")
+                return;
+
+            int output;
+
+            if (!int.TryParse(textBox.Text, out output))
+                return;
+
+            if (output >= 256)
+                return;
+
+            pallet.Color.R = byte.Parse(textBox.Text);
+
+            try
+            {
+                SliderR.Value = pallet.Color.R;
+
+                Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
+            }
+            catch { }
+        }
+
+        private void Green_Changed(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+
+            if (textBox.Text == "")
+                return;
+
+            int output;
+
+            if (!int.TryParse(textBox.Text, out output))
+                return;
+
+            if (output >= 256)
+                return;
+
+            pallet.Color.G = byte.Parse(textBox.Text);
+
+            try
+            {
+                SliderG.Value = pallet.Color.G;
+
+                Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
+            }
+            catch { }
+        }
+
+        private void Blue_Changed(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+
+            if (textBox.Text == "")
+                return;
+
+            int output;
+
+            if (!int.TryParse(textBox.Text, out output))
+                return;
+
+            if (output >= 256)
+                return;
+
+            pallet.Color.B = byte.Parse(textBox.Text);
+
+            try
+            {
+                SliderB.Value = pallet.Color.B;
 
                 Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
             }
