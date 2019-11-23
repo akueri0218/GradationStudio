@@ -1,0 +1,29 @@
+it_Session {-vers 2} {
+  # saved on: 13:41:18 11/22/19 2019
+  # for: AquariusZero
+  # by: it 21.5 (@1769424 Jul 25 2017)
+  CatalogList {} {
+    Catalog {-name Catalog1} {
+      Viewspec {} {
+        channelView c
+        colorSpace sRGB
+        colorTransform sRGB
+        correctionMode 0
+        pan {-52.500000 -135.000000}
+        zoomFactor 0.800000
+      }
+      SequenceInfo {} {
+        frameRange {1 0}
+        currentFrame 1
+      }
+      ImageList {} {
+        ImageElement {-handle e12 -isSequence 0 -filename diamond.tif} {
+          statusMsg {1280x720 4 channel 32bit float}
+          notes {}
+          dspyParams {; d_socket_ctx -id LAPTOP-F1EGQ7JA/8864 -primary 1;}
+          useCustomView 0
+        }
+      }
+    }
+  }
+}
