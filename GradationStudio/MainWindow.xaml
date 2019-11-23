@@ -45,19 +45,20 @@
             <DockPanel DockPanel.Dock="Bottom" Height="130" Width="260" Background="LightGray">
                 <!--slider-->
                 <DockPanel DockPanel.Dock="Top">
-                    <Slider x:Name="SliderR" ValueChanged="SliderR_Changed" Height="30" Width="210" Foreground="#FF0000" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
+                    <Slider x:Name="SliderR" ValueChanged="SliderR_Changed" Height="30" Width="200" Foreground="#FF0000" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
                             TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1" SmallChange="1" LargeChange="1" Value="255"/>
-                    <Label x:Name="LabelR" Height="30" Width="30" Content="255" VerticalContentAlignment="Center"/>
+                    <TextBox x:Name="LabelR" TextChanged="Red_Changed" Height="30" Width="30" Text="255" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
                 </DockPanel>
                 <DockPanel DockPanel.Dock="Top">
-                    <Slider x:Name="SliderG" ValueChanged="SliderG_Changed" Height="30" Width="210" Foreground="#00FF00" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
+                    <Slider x:Name="SliderG" ValueChanged="SliderG_Changed" Height="30" Width="200" Foreground="#00FF00" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
                             TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1" SmallChange="1" LargeChange="1" Value="255"/>
-                    <Label x:Name="LabelG" Height="30" Width="30" Content="255" VerticalContentAlignment="Center"/>
+                    <TextBox x:Name="LabelG" TextChanged="Green_Changed" Height="30" Width="30" Text="255" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+
                 </DockPanel>
                 <DockPanel DockPanel.Dock="Top">
-                    <Slider x:Name="SliderB"  ValueChanged="SliderB_Changed" Height="30" Width="210" Foreground="#0000FF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
+                    <Slider x:Name="SliderB"  ValueChanged="SliderB_Changed" Height="30" Width="200" Foreground="#0000FF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
                             TickPlacement="BottomRight" Minimum="0" Maximum="255" TickFrequency="1" SmallChange="1" LargeChange="1" Value="255"/>
-                    <Label x:Name="LabelB" Height="30" Width="30" Content="255" VerticalContentAlignment="Center"/>
+                    <TextBox x:Name="LabelB" TextChanged="Blue_Changed" Height="30" Width="30" Text="255" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
                 </DockPanel>
 
                 <DockPanel x:Name="Preview" DockPanel.Dock="Left" Background="White" VerticalAlignment="Bottom"  Height="40">

@@ -391,7 +391,7 @@ namespace GradationStudio
 
             try
             {
-                LabelR.Content = (byte)slider.Value;
+                LabelR.Text = ((byte)slider.Value).ToString();
 
                 pallet.Color.R = (byte)slider.Value;
 
@@ -405,7 +405,7 @@ namespace GradationStudio
 
             try
             {
-                LabelG.Content = (byte)slider.Value;
+                LabelG.Text = ((byte)slider.Value).ToString();
 
                 pallet.Color.G = (byte)slider.Value;
 
@@ -419,9 +419,87 @@ namespace GradationStudio
 
             try
             {
-                LabelB.Content = (byte)slider.Value;
+                LabelB.Text = ((byte)slider.Value).ToString();
 
                 pallet.Color.B = (byte)slider.Value;
+
+                Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
+            }
+            catch { }
+        }
+
+        private void Red_Changed(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+
+            if (textBox.Text == "")
+                return;
+
+            int output;
+
+            if (!int.TryParse(textBox.Text, out output))
+                return;
+
+            if (output >= 256)
+                return;
+
+            pallet.Color.R = byte.Parse(textBox.Text);
+
+            try
+            {
+                SliderR.Value = pallet.Color.R;
+
+                Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
+            }
+            catch { }
+        }
+
+        private void Green_Changed(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+
+            if (textBox.Text == "")
+                return;
+
+            int output;
+
+            if (!int.TryParse(textBox.Text, out output))
+                return;
+
+            if (output >= 256)
+                return;
+
+            pallet.Color.G = byte.Parse(textBox.Text);
+
+            try
+            {
+                SliderG.Value = pallet.Color.G;
+
+                Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
+            }
+            catch { }
+        }
+
+        private void Blue_Changed(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+
+            if (textBox.Text == "")
+                return;
+
+            int output;
+
+            if (!int.TryParse(textBox.Text, out output))
+                return;
+
+            if (output >= 256)
+                return;
+
+            pallet.Color.B = byte.Parse(textBox.Text);
+
+            try
+            {
+                SliderB.Value = pallet.Color.B;
 
                 Preview.Background = new SolidColorBrush(Color.FromRgb(pallet.Color.R, pallet.Color.G, pallet.Color.B));
             }
